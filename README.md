@@ -1,10 +1,13 @@
-# blinky-lite-demo device-message-adapter
+# blinky-lite-demo user-interface
 ## need to add .env file with the following
-ARCHIVERTOPIC=archiver\/blinky-lite\/demo\/breadboard\/green\/<br/>
-MQTTCLIENTID=blinky-lite-demo-green-dma<br/>
-MQTTSERVERIP=blinky-lite-controlbox-01.local<br/>
+MONGODBIP=127.0.0.1<br/>
+MQTTCLIENTID=blinky-lite-core<br/>
+MQTTSERVERIP=127.0.0.1<br/>
 MQTTUSERNAME=blinky-lite-controlbox-01<br/>
 MQTTPASSWORD=blinky-lite<br/>
+APPPORT=1880<br>
+COREPORT=11880<br>
 NODEREDCONFIGSECRET=a-secret-key<br/>
 <br/>
 with no CR after the last line
+

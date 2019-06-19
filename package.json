@@ -1,5 +1,5 @@
 {
-  "name": "bake-out-device-message-adapter",
+  "name": "blinky-lite-demo-user-interface",
   "version": "1.0.0",
   "description": "",
   "main": "node_modules/node-red/red.js -s ./settings.js -u ./",
@@ -20,8 +20,8 @@
   },
   "homepage": "",
   "dependencies": {
-    "i2c-bus": "^4.0.9",
     "node-red": "^0.20.5",
-    "node-red-dashboard": "^2.15.4"
+    "node-red-dashboard": "^2.13.2",
+    "node-red-node-mongodb": "0.0.14"
   }
 }
