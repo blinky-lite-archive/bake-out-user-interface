@@ -586,7 +586,7 @@
         "type": "function",
         "z": "a7b9d689.b8a5e8",
         "name": "putDevArchive",
-        "func": "//if (msg.payload.length < 1) return null;\n//if (msg.payload[0].type != 'scalar') return null;\n\nvar data = [];\nvar npts = msg.payload.length;\nvar step = 1;\nfor (var ii = 0; ii < npts; ++ii)\n{\n    var ipt = Math.round(ii * step);\n    data[ii] = \n    {\n        value   : msg.payload[ipt].value, \n        time    : msg.payload[ipt].time\n    }\n}\nreturn {\n    topic:'putDevArchive',\n    payload:{\n        topic           : 'putDevArchive',\n        payload         : data,\n        userID          : msg.userID,\n        plotDevice      : msg.plotDevice\n\n    }\n};\n",
+        "func": "//if (msg.payload.length < 1) return null;\n//if (msg.payload[0].type != 'scalar') return null;\nfunction sortByKey(array, key) \n{\n    return array.sort(\n        function(a, b) \n        {\n            var x = a[key]; var y = b[key];\n            return ((x < y) ? -1 : ((x > y) ? 1 : 0));\n        });\n}\nsortByKey(msg.payload, 'time');\nvar data = [];\nvar npts = msg.payload.length;\nvar step = 1;\nfor (var ii = 0; ii < npts; ++ii)\n{\n    var ipt = Math.round(ii * step);\n    data[ii] = \n    {\n        value   : msg.payload[ipt].value, \n        time    : msg.payload[ipt].time\n    }\n}\nreturn {\n    topic:'putDevArchive',\n    payload:{\n        topic           : 'putDevArchive',\n        payload         : data,\n        userID          : msg.userID,\n        plotDevice      : msg.plotDevice\n\n    }\n};\n",
         "outputs": 1,
         "noerr": 0,
         "x": 1160,
@@ -1428,7 +1428,7 @@
         "type": "function",
         "z": "3e89bdec.f16662",
         "name": "putDevArchive",
-        "func": "var data = [];\nvar npts = msg.payload.length;\nvar step = 1;\nfor (var ii = 0; ii < npts; ++ii)\n{\n    var ipt = Math.round(ii * step);\n    data[ii] = \n    {\n        value   : msg.payload[ipt].value, \n        time    : msg.payload[ipt].time\n    }\n}\nreturn {\n    topic:'putDevArchive',\n    payload:{\n        topic           : 'putDevArchive',\n        payload         : data,\n        userID          : msg.userID,\n        plotDevice      : msg.plotDevice\n\n    }\n};\n",
+        "func": "function sortByKey(array, key) \n{\n    return array.sort(\n        function(a, b) \n        {\n            var x = a[key]; var y = b[key];\n            return ((x < y) ? -1 : ((x > y) ? 1 : 0));\n        });\n}\nsortByKey(msg.payload, 'time');\nvar data = [];\nvar npts = msg.payload.length;\nvar step = 1;\nfor (var ii = 0; ii < npts; ++ii)\n{\n    var ipt = Math.round(ii * step);\n    data[ii] = \n    {\n        value   : msg.payload[ipt].value, \n        time    : msg.payload[ipt].time\n    }\n}\nreturn {\n    topic:'putDevArchive',\n    payload:{\n        topic           : 'putDevArchive',\n        payload         : data,\n        userID          : msg.userID,\n        plotDevice      : msg.plotDevice\n\n    }\n};\n",
         "outputs": 1,
         "noerr": 0,
         "x": 1180,
@@ -4479,7 +4479,7 @@
         "type": "function",
         "z": "ba4ca6b2.dca988",
         "name": "Get relay and ramp archive",
-        "func": "function getDeviceReadingId(device,attr)\n{\n    var topic = device[4] + 'Devices';\n    var devices = flow.get(topic);\n    for (var ii = 0; ii < devices.length; ++ii)\n    {\n        if (devices[ii].attr == attr) return devices[ii]['_id'];\n    }\n    return null;\n}\nvar device = msg.topic.split('/');\nif (device[6] == 'temperature')\n{\n    var temperature = [];\n    for (var ii = 0; ii < msg.payload.length; ++ii)\n    {\n        temperature[ii] = \n        {\n            time    :   msg.payload[ii].time,\n            value   :   msg.payload[ii].value\n        }\n    }\n    context.set('temperature',temperature);\n    var attr = 'relay';\n    device[6] = attr;\n    var topic = 'archiver';\n    for (var ii = 1; ii < 7; ++ii) topic = topic + '/' + device[ii];\n    var msg1 = \n    {\n        topic           : topic,\n        userID          : msg.userID,\n        payload         : \n        {\n            time    :   {'$gt': msg.startTime, '$lt': msg.stopTime},\n            device_id   :   getDeviceReadingId(device,attr)\n        },\n        startTime   : msg.startTime,\n        stopTime    : msg.stopTime,\n    };\n    return [msg1,null]\n}\nif (device[6] == 'relay')\n{\n    var relay = [];\n    for (var ii = 0; ii < msg.payload.length; ++ii)\n    {\n        relay[ii] = \n        {\n            time    :   msg.payload[ii].time,\n            value   :   msg.payload[ii].value\n        }\n    }\n    context.set('relay',relay);\n    var attr = 'ramp-temp';\n    device[6] = attr;\n    var topic = 'archiver';\n    for (var ii = 1; ii < 7; ++ii) topic = topic + '/' + device[ii];\n    var msg1 = \n    {\n        topic           : topic,\n        userID          : msg.userID,\n        payload         : \n        {\n            time    :   {'$gt': msg.startTime, '$lt': msg.stopTime},\n            device_id   :   getDeviceReadingId(device,attr)\n        },\n        startTime   : msg.startTime,\n        stopTime    : msg.stopTime,\n    };\n    return [msg1,null]\n    \n}\nif (device[6] == 'ramp-temp')\n{\n    var rampTemp = [];\n    for (var ii = 0; ii < msg.payload.length; ++ii)\n    {\n        rampTemp[ii] = \n        {\n            time    :   msg.payload[ii].time,\n            value   :   msg.payload[ii].value\n        }\n    }\n    var topic = device[4] + 'Archive';\n    var msg1 = \n    {\n        topic           : topic,\n        payload         : \n        {\n            topic       : 'archive',\n            userID      : msg.userID,\n            startTime   : msg.startTime,\n            stopTime    : msg.stopTime,\n            payload     :\n            {\n                'temperature'   : context.get('temperature'),\n                'relay'         : context.get('relay'),\n                'ramp-temp'     : rampTemp\n            }\n        },\n    };\n    flow.set('archiveRequestBlock',false);\n\n    return [null,msg1]\n\n}\n\nreturn null;",
+        "func": "function sortByKey(array, key) \n{\n    return array.sort(\n        function(a, b) \n        {\n            var x = a[key]; var y = b[key];\n            return ((x < y) ? -1 : ((x > y) ? 1 : 0));\n        });\n}\nsortByKey(msg.payload, 'time');\nfunction getDeviceReadingId(device,attr)\n{\n    var topic = device[4] + 'Devices';\n    var devices = flow.get(topic);\n    for (var ii = 0; ii < devices.length; ++ii)\n    {\n        if (devices[ii].attr == attr) return devices[ii]['_id'];\n    }\n    return null;\n}\nvar device = msg.topic.split('/');\nif (device[6] == 'temperature')\n{\n    var temperature = [];\n    for (var ii = 0; ii < msg.payload.length; ++ii)\n    {\n        temperature[ii] = \n        {\n            time    :   msg.payload[ii].time,\n            value   :   msg.payload[ii].value\n        }\n    }\n    context.set('temperature',temperature);\n    var attr = 'relay';\n    device[6] = attr;\n    var topic = 'archiver';\n    for (var ii = 1; ii < 7; ++ii) topic = topic + '/' + device[ii];\n    var msg1 = \n    {\n        topic           : topic,\n        userID          : msg.userID,\n        payload         : \n        {\n            time    :   {'$gt': msg.startTime, '$lt': msg.stopTime},\n            device_id   :   getDeviceReadingId(device,attr)\n        },\n        startTime   : msg.startTime,\n        stopTime    : msg.stopTime,\n    };\n    return [msg1,null]\n}\nif (device[6] == 'relay')\n{\n    var relay = [];\n    for (var ii = 0; ii < msg.payload.length; ++ii)\n    {\n        relay[ii] = \n        {\n            time    :   msg.payload[ii].time,\n            value   :   msg.payload[ii].value\n        }\n    }\n    context.set('relay',relay);\n    var attr = 'ramp-temp';\n    device[6] = attr;\n    var topic = 'archiver';\n    for (var ii = 1; ii < 7; ++ii) topic = topic + '/' + device[ii];\n    var msg1 = \n    {\n        topic           : topic,\n        userID          : msg.userID,\n        payload         : \n        {\n            time    :   {'$gt': msg.startTime, '$lt': msg.stopTime},\n            device_id   :   getDeviceReadingId(device,attr)\n        },\n        startTime   : msg.startTime,\n        stopTime    : msg.stopTime,\n    };\n    return [msg1,null]\n    \n}\nif (device[6] == 'ramp-temp')\n{\n    var rampTemp = [];\n    for (var ii = 0; ii < msg.payload.length; ++ii)\n    {\n        rampTemp[ii] = \n        {\n            time    :   msg.payload[ii].time,\n            value   :   msg.payload[ii].value\n        }\n    }\n    var topic = device[4] + 'Archive';\n    var msg1 = \n    {\n        topic           : topic,\n        payload         : \n        {\n            topic       : 'archive',\n            userID      : msg.userID,\n            startTime   : msg.startTime,\n            stopTime    : msg.stopTime,\n            payload     :\n            {\n                'temperature'   : context.get('temperature'),\n                'relay'         : context.get('relay'),\n                'ramp-temp'     : rampTemp\n            }\n        },\n    };\n    flow.set('archiveRequestBlock',false);\n\n    return [null,msg1]\n\n}\n\nreturn null;",
         "outputs": 2,
         "noerr": 0,
         "x": 980,
@@ -4525,5 +4525,188 @@
                 "c57dceff.d99e5"
             ]
         ]
+    },
+    {
+        "id": "342f7115.8694ee",
+        "type": "debug",
+        "z": "372efc91.0669c4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 750,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "2149f6fe.c2c11a",
+        "type": "inject",
+        "z": "372efc91.0669c4",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 180,
+        "y": 280,
+        "wires": [
+            [
+                "473100a5.67eae"
+            ]
+        ]
+    },
+    {
+        "id": "473100a5.67eae",
+        "type": "function",
+        "z": "372efc91.0669c4",
+        "name": "Last 2 Weeks",
+        "func": "var stopTime = new Date().getTime();\nvar startTime = stopTime - 2 * 168 * 3600000\nvar newMsg = \n{\n    payload         : \n    {\n        time    :   {'$gt': startTime, '$lt': stopTime},\n    },\n};\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 380,
+        "y": 280,
+        "wires": [
+            [
+                "7e4af637.f88998"
+            ]
+        ]
+    },
+    {
+        "id": "75fe3027.97ec7",
+        "type": "debug",
+        "z": "372efc91.0669c4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 750,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "b7ada90b.0d5438",
+        "type": "inject",
+        "z": "372efc91.0669c4",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 180,
+        "y": 380,
+        "wires": [
+            [
+                "add0b2df.58c53"
+            ]
+        ]
+    },
+    {
+        "id": "add0b2df.58c53",
+        "type": "function",
+        "z": "372efc91.0669c4",
+        "name": "Before last 2 weeks",
+        "func": "var stopTime = new Date().getTime();\nvar startTime = stopTime - 2 * 168 * 3600000\nvar newMsg = \n{\n    payload         : \n    {\n        time    :   {'$lt': startTime},\n    },\n};\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 390,
+        "y": 380,
+        "wires": [
+            [
+                "ea7a98e3.20ffd8"
+            ]
+        ]
+    },
+    {
+        "id": "52a2fa92.6d35a4",
+        "type": "inject",
+        "z": "372efc91.0669c4",
+        "name": "Every 24 hours",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "86400",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "100",
+        "x": 200,
+        "y": 460,
+        "wires": [
+            [
+                "9501b6d5.5200a8"
+            ]
+        ]
+    },
+    {
+        "id": "9501b6d5.5200a8",
+        "type": "function",
+        "z": "372efc91.0669c4",
+        "name": "2 Weeks Past",
+        "func": "var stopTime = new Date().getTime();\nvar startTime = stopTime - 2 * 168 * 3600000;\nvar newMsg = \n{\n    payload         : \n    {\n        time    :   {'$lt': startTime},\n    },\n};\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 380,
+        "y": 460,
+        "wires": [
+            [
+                "2fe7b7af.b66dd8"
+            ]
+        ]
+    },
+    {
+        "id": "7e4af637.f88998",
+        "type": "mongodb in",
+        "z": "372efc91.0669c4",
+        "mongodb": "a77ab212.bfa86",
+        "name": "Count records",
+        "collection": "archiver",
+        "operation": "count",
+        "x": 560,
+        "y": 280,
+        "wires": [
+            [
+                "342f7115.8694ee"
+            ]
+        ]
+    },
+    {
+        "id": "ea7a98e3.20ffd8",
+        "type": "mongodb in",
+        "z": "372efc91.0669c4",
+        "mongodb": "a77ab212.bfa86",
+        "name": "Count records",
+        "collection": "archiver",
+        "operation": "count",
+        "x": 580,
+        "y": 380,
+        "wires": [
+            [
+                "75fe3027.97ec7"
+            ]
+        ]
+    },
+    {
+        "id": "2fe7b7af.b66dd8",
+        "type": "mongodb out",
+        "z": "372efc91.0669c4",
+        "mongodb": "a77ab212.bfa86",
+        "name": "Remove",
+        "collection": "archiver",
+        "payonly": false,
+        "upsert": false,
+        "multi": false,
+        "operation": "delete",
+        "x": 580,
+        "y": 460,
+        "wires": []
     }
 ]
